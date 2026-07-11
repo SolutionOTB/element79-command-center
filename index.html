@@ -228,7 +228,7 @@
       <div class="toolbar">
         <label id="testwrap"><input type="checkbox" id="testmode"> Address drafts to me instead (test run)</label>
         <span id="draftcount"></span>
-        <a href="https://mail.google.com/mail/#drafts" target="_blank">Open Gmail drafts &rarr;</a>
+        <a id="mailboxlink" href="https://outlook.office.com/mail/" target="_blank">Open Outlook &rarr;</a>
       </div>
       <div id="detail"></div>
     </div>
@@ -324,13 +324,14 @@ const SIG_HTML = '<p style="margin-top:18px">Les and Sharon<br><b>Element 79 Vin
 const KINDCLS = {Retention:"k-save", Growth:"k-grow", Inventory:"k-move"};
 const SIG_TEXT = "Les and Sharon\nElement 79 Vineyards, Fair Play AVA, El Dorado County\nTasting room Thursday to Sunday 11 to 5, Monday 12 to 5. Reply to this note or call the tasting room and we will set everything up.";
 function plainBody(p){ return p.paras.map(x=>x.replace(/<[^>]+>/g,"")).join("\n\n") + "\n\n" + SIG_TEXT; }
-function gmailLink(p){ return "https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(p.email)+"&su="+encodeURIComponent(p.subject)+"&body="+encodeURIComponent(plainBody(p)); }
+function outlookLink(p){ return "https://outlook.office.com/mail/deeplink/compose?to="+encodeURIComponent(p.email)+"&subject="+encodeURIComponent(p.subject)+"&body="+encodeURIComponent(plainBody(p)); }
 function mailtoLink(p){ return "mailto:"+encodeURIComponent(p.email)+"?subject="+encodeURIComponent(p.subject)+"&body="+encodeURIComponent(plainBody(p)); }
 function markOpened(cid,i){ const p=DATA.campaigns.find(c=>c.id===cid).people[i]; state.drafted[p.email]="link"; save(); renderDetail(); renderOverview(); }
 const canExec = MODE === "cowork" && typeof window.cowork !== "undefined";
 
+if(canExec){ const ml=document.getElementById("mailboxlink"); if(ml){ ml.href="https://mail.google.com/mail/#drafts"; ml.textContent="Open Gmail drafts →"; } }
 if(MODE==="demo"){ show("Demonstration with anonymized sample data. The private version runs on real customers behind a login."); }
-if(MODE==="private"){ show("Private. Real customer data. Open a campaign, click a name, and send each note from your own email account."); }
+if(MODE==="private"){ show("Private. Real customer data. Open a campaign, click a name, and send each note from your own Outlook account."); }
 function show(t){ const b=document.getElementById("modebanner"); b.style.display="block"; document.getElementById("modebanner-text").textContent=t; }
 
 let state = JSON.parse(localStorage.getItem("e79-pilot-v1") || '{"drafted":{},"called":{}}');
@@ -402,9 +403,9 @@ function personRow(p,i,cid){
     <div class="pvbox"><div class="subj">Subject: ${esc(p.subject)}</div>${emailHtml(p)}
     ${p.channel==="call" ? `<label style="font-size:13px;display:flex;gap:7px;align-items:center;margin-top:6px"><input type="checkbox" ${state.called[p.email]?"checked":""} onclick="event.stopPropagation();markCalled('${cid}',${i},this.checked)"> Mark as called</label>` : ""}
     ${p.channel==="email" && !canExec ? `<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap" onclick="event.stopPropagation()">
-      <a class="btn primary" href="${gmailLink(p)}" target="_blank" rel="noopener" onclick="markOpened('${cid}',${i})">Open in Gmail</a>
+      <a class="btn primary" href="${outlookLink(p)}" target="_blank" rel="noopener" onclick="markOpened('${cid}',${i})">Open in Outlook</a>
       <a class="btn ghost" href="${mailtoLink(p)}" onclick="markOpened('${cid}',${i})">Open in mail app</a>
-      <span class="note" style="align-self:center">Opens prefilled in your own email, ready to send.</span></div>` : ""}
+      <span class="note" style="align-self:center">Opens prefilled in your own Outlook, ready to send.</span></div>` : ""}
     </div></td></tr>`;
 }
 function renderDetail(){
@@ -416,7 +417,7 @@ function renderDetail(){
     ? `<button class="btn primary" id="runbtn" ${remaining===0||running?"disabled":""} onclick="runBatch()">${remaining===0?"All "+nE+" drafts are in Gmail ✓":"Create "+remaining+" personal drafts in Gmail"}</button>
        ${running?'<button class="btn stop" onclick="stopFlag=true">Stop</button>':""}
        <span class="note" id="runnote">${remaining>0?"Each draft is written to your Gmail drafts folder. Review and send from there.":"Open Gmail, review, send."}</span>`
-    : `<span class="note" id="runnote"><b>${remaining} notes ready.</b> Click a name to read the note, then choose Open in Gmail. The message opens prefilled in whichever email account you are signed into, ready to send. Each one you open gets checked off.</span>`;
+    : `<span class="note" id="runnote"><b>${remaining} notes ready.</b> Click a name to read the note, then choose Open in Outlook. The message opens prefilled in whichever Outlook account you are signed into, ready to send. Each one you open gets checked off.</span>`;
   document.getElementById("detail").innerHTML = `
     <div class="actions" style="padding:0 0 14px">${btn}</div>
     <table><thead><tr><th style="width:24%">Person</th><th style="width:28%">Why they are on this list</th><th style="width:32%">Their offer</th><th>Status</th></tr></thead>
